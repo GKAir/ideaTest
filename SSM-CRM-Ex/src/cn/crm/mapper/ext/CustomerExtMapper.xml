@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.crm.mapper.ext.CustomerExtMapper">
+
+	<sql id="where">
+		<if test="customer != null">
+			<if test="customer.custName != null and customer.custName != ''">
+				AND cust.cust_name LIKE '%${customer.custName}%'
+			</if>
+
+			<if test="customer.custSource != null and customer.custSource != ''">
+				AND cust.cust_source = #{customer.custSource}
+			</if>
+
+			<if test="customer.custIndustry != null and customer.custIndustry != ''">
+				AND cust.cust_industry = #{customer.custIndustry}
+			</if>
+
+			<if test="customer.custLevel != null and customer.custLevel != ''">
+				AND cust.cust_level = #{customer.custLevel}
+			</if>
+		</if>
+	</sql>
+
+	<!-- 查询客户列表 -->
+	<select id="queryCustomerList" parameterType="customerQueryVo"
+		resultType="customer">
+		SELECT
+		cust.cust_id custId,
+		cust.cust_name custName,
+		dict1.dict_item_name custSource,
+		dict2.dict_item_name custIndustry,
+		dict3.dict_item_name custLevel,
+		cust.cust_phone custPhone,
+		cust.cust_mobile custMobile
+		FROM
+		customer cust
+		LEFT JOIN base_dict dict1
+		ON cust.cust_source = dict1.dict_id
+		LEFT JOIN base_dict dict2 ON
+		cust.cust_industry = dict2.dict_id
+		LEFT JOIN base_dict dict3 ON
+		cust.cust_level = dict3.dict_id
+		<where>
+			<include refid="where"></include>
+		</where>
+		LIMIT #{start}, #{rows};
+	</select>
+	<!-- 查询客户总数 -->
+	<select id="queryCustomerCount" parameterType="customerQueryVo"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		customer cust
+		<where>
+			<include refid="where"></include>
+		</where>
+	</select>
+
+</mapper>
